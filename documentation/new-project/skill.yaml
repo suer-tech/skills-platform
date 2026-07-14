@@ -12,10 +12,6 @@ description: >
 
 author: skills-platform
 
-entrypoint:
-  type: agent
-  handler: src.main
-
 inputs:
 
   project_name:
