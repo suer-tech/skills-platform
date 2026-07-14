@@ -1,0 +1,44 @@
+project:
+
+  name: Tender AI
+
+  description:
+    AI system for tender search and analysis
+
+
+technology:
+
+  language: Python
+
+  framework: FastAPI
+
+  database: PostgreSQL
+
+
+architecture:
+
+  pattern: service-repository
+
+
+ai:
+
+  enabled: true
+
+  agents:
+
+    - planner
+
+    - searcher
+
+    - analyst
+
+
+documentation:
+
+  required:
+
+    - AGENT
+
+    - ARCHITECTURE
+
+    - PROJECT_MAP

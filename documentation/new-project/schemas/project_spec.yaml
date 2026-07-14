@@ -1,0 +1,51 @@
+project:
+
+  name:
+
+  description:
+
+  type:
+
+
+users:
+
+  -
+
+
+technology:
+
+  language:
+
+  framework:
+
+  database:
+
+
+architecture:
+
+  pattern:
+
+
+ai:
+
+  enabled:
+
+  models:
+
+  agents:
+
+
+deployment:
+
+  environment:
+
+
+documentation:
+
+  required:
+
+    - README
+
+    - ARCHITECTURE
+
+    - AGENT

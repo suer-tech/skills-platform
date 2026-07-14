@@ -1,0 +1,43 @@
+id: documentation.new-project
+
+name: New Project Documentation
+
+version: 0.1.0
+
+category: documentation
+
+description: >
+  Проводит AI-бриф проекта, создает Project Specification
+  и генерирует базовую архитектурную документацию проекта.
+
+author: skills-platform
+
+entrypoint:
+  type: agent
+  handler: src.main
+
+inputs:
+
+  project_name:
+    required: false
+    description: Название проекта
+
+  project_description:
+    required: false
+    description: Краткое описание проекта
+
+
+outputs:
+
+  project_spec:
+    type: yaml
+
+  documentation:
+    type: files
+
+capabilities:
+
+  - project_interview
+  - architecture_planning
+  - documentation_generation
+  - agent_context_creation
