@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.idea/
+.python-version
+*.egg-info/
+.vercel/
+.venv/
+venv/
