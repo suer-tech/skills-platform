@@ -1,0 +1,36 @@
+id: engineering.bug-hunt
+
+name: Bug Hunt
+
+version: 0.1.0
+
+category: engineering
+
+description: >
+  Анализирует проект на наличие багов, влияющих на работоспособность.
+  Находит логические ошибки, проблемы обработки ошибок,
+  нулевые ссылки, гонки и другие критические дефекты.
+
+author: skills-platform
+
+inputs:
+
+  project_path:
+    required: true
+    description: Путь к проекту
+
+  fix:
+    required: false
+    description: "Автоматически исправить найденные баги (true/false)"
+
+outputs:
+
+  report:
+    type: yaml
+    description: Отчёт с найденными багами и рекомендациями
+
+capabilities:
+
+  - static_analysis
+  - bug_detection
+  - code_review

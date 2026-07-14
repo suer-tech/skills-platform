@@ -8,7 +8,7 @@ category: documentation
 
 description: >
   Анализирует текущее состояние проекта и обновляет
-  документацию, созданную скиллом new-project.
+  документацию проекта.
 
 author: skills-platform
 

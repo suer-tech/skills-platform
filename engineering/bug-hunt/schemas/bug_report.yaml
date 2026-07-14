@@ -1,0 +1,8 @@
+bugs:
+
+  - file:
+    line:
+    severity: critical | high | medium
+    title:
+    description:
+    fix:
