@@ -1,87 +1,39 @@
-# Workflow Reference
+# Workflow Diagram
 
-Полное описание жизненного цикла. Для быстрого ориентирования.
+Reference for Orchestrator. Not for sub-agents.
 
-## Pipeline
-
-```
-User Request
-    │
-    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 1: INTAKE                      Actor: Orchestrator           │
-│  ─────────────────────────────────────────────────────────────────── │
-│  Записать brief.md                                                   │
-└─────────────────────────────────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 2: PLANNING                    Actor: Planner                │
-│  ─────────────────────────────────────────────────────────────────── │
-│  proposal.md → spec.md → design.md → tasks.md → handoff.md          │
-└─────────────────────────────────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 3: IMPLEMENTATION              Actor: Developer              │
-│  ─────────────────────────────────────────────────────────────────── │
-│  Выполнить tasks.md, изменения в коде, status.md                    │
-└─────────────────────────────────────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 4: VERIFICATION                Actor: Tester                 │
-│  ─────────────────────────────────────────────────────────────────── │
-│  test-plan.md → test-report.md → bug-report.md (если дефекты)       │
-└─────────────────────────────────────────────────────────────────────┘
-    │
-    ├── pass ─────────────────────────────────────────► PHASE 6
-    │
-    └── fail ───► PHASE 5: FEEDBACK LOOP
-                      Actor: Orchestrator → Developer → Tester
-                      └── повторять, пока pass
-    │
-    ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 6: CLOSURE                      Actor: Orchestrator          │
-│  ─────────────────────────────────────────────────────────────────── │
-│  archive.md, status.md → done, финальный ответ пользователю          │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-## Artefact Dependencies
+## Agent Isolation
 
 ```
-brief.md        → proposal.md
-proposal.md     → spec.md
-spec.md         → design.md + tasks.md
-tasks.md        → handoff.md
-handoff.md      → implementation (Developer)
-                → verification (Tester)
-test-report.md  → archive.md (если pass)
-                → bug-report.md → Developer (если fail)
-bug-report.md   → fix → re-test → test-report.md
+Orchestrator ──brief.md──► Planner ──proposal.md──► Orchestrator
+                                          spec.md
+                                         design.md
+                                         tasks.md
+                                         handoff.md
+
+Orchestrator ──tasks.md──► Developer ──code changes──► Orchestrator
+               handoff.md    │          handoff.md (log)
+                             │
+                             └──► (if bugs) bug-report.md
+
+Orchestrator ──spec.md────► Tester ──test-plan.md──► Orchestrator
+               tasks.md              test-report.md
+               handoff.md            bug-report.md (optional)
 ```
 
-## Status File
+## Communication Matrix
 
-`status.md` — единственный источник правды о текущем состоянии.
+| Agent | Reads | Writes |
+|-------|-------|--------|
+| Orchestrator | all artifacts | brief.md, status.md, archive.md |
+| Planner | brief.md | proposal.md, spec.md, design.md, tasks.md, handoff.md |
+| Developer | tasks.md, handoff.md | code changes, handoff.md (log) |
+| Tester | spec.md, tasks.md, handoff.md | test-plan.md, test-report.md, bug-report.md |
 
-```markdown
-# Status
+## State Machine
 
-## Phase
-planning | implementation | verification | done
-
-## Current Task
-Task ID or "—"
-
-## Iteration
-1, 2, 3...
-
-## Blockers
-—
-
-## Last Updated
-YYYY-MM-DD HH:MM
+```
+INTAKE ──► PLANNING ──► IMPLEMENT ──► VERIFY ──► ──► ARCHIVE
+                              ▲                  │
+                              └── (bugs) ◄───────┘
 ```

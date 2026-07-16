@@ -1,9 +1,10 @@
 ---
 name: code-dev
 description: >
-  End-to-end development workflow with mandatory artifact creation.
-  Use for ANY code change: it forces you to plan, spec, design, implement,
-  test, and archive — in that order, with checkable artifacts at each step.
+  Multi-agent development workflow. Orchestrator delegates to isolated
+  sub-agents (Planner, Developer, Tester) through artifact handoffs.
+  Use for any code change that requires structured planning, implementation,
+  and verification across multiple specialised agents.
 metadata:
   id: engineering.code-dev
   version: "0.1.0"
@@ -33,142 +34,131 @@ metadata:
     - documentation_generation
 ---
 
-# Code Development — Strict Protocol
+# Orchestrator
 
-## RULES (you MUST follow every rule)
+You are the **Orchestrator**. You are the ONLY agent who knows about all other agents. Your job is to manage the workflow by delegating to isolated sub-agents through artifact handoffs.
+
+## How it works
+
+You execute phases in order. For each phase, you load a sub-agent's instruction file, clear your context of previous sub-agents, and act solely as that sub-agent. Sub-agents communicate ONLY through artifact files — they never know about each other.
+
+```
+Phase 1: INTAKE       — you (Orchestrator) create brief.md
+Phase 2: PLANNING     — load planner.md, create proposal → spec → design → tasks → handoff
+Phase 3: IMPLEMENT    — load developer.md, implement tasks
+Phase 4: VERIFY       — load tester.md, test and report
+Phase 5: FEEDBACK     — you (Orchestrator) decide: pass → archive, fail → repeat Phase 3-4
+Phase 6: ARCHIVE      — you (Orchestrator) create archive.md
+```
+
+## RULES (never violate these)
 
 ### Gate 1: No code before plan
-YOU MUST create ALL of these files BEFORE writing any code:
-1. `brief.md`
-2. `proposal.md`
-3. `spec.md`
-4. `design.md`
-5. `tasks.md`
-6. `handoff.md`
+BEFORE loading developer.md you MUST have ALL of these files:
+- `brief.md` — confirmed
+- `proposal.md` — confirmed
+- `spec.md`
+- `design.md`
+- `tasks.md`
+- `handoff.md`
 
-If any of these files does not exist, you are NOT allowed to write code.
+If any is missing, do NOT load developer.md.
 
 ### Gate 2: No closure without testing
-YOU MUST create ALL of these files BEFORE declaring done:
-1. `test-plan.md`
-2. `test-report.md`
-3. `archive.md`
+BEFORE declaring done you MUST have:
+- `test-plan.md`
+- `test-report.md`
 
 ### Gate 3: Bugs must be fixed
-If `bug-report.md` exists and has open items, you MUST fix them and re-test. Do NOT skip to archive.
+If `bug-report.md` exists with open items, reload developer.md to fix, then reload tester.md to re-test. Repeat until test-report shows all pass.
 
-### Gate 4: One file at a time
-Create files in the order listed below. Do NOT skip ahead.
+### Gate 4: Sub-agents are isolated
+When you switch to a sub-agent, forget everything except what the handoff artifacts say. Do NOT carry knowledge from planner.md into developer.md.
 
 ---
 
 ## EXACT SEQUENCE
 
-### Step 1 — brief.md
+### Phase 1 — Intake (you as Orchestrator)
 
-Create `brief.md` from [the template](assets/templates/brief.md).
+1. Ask the user: project path, what needs to be done, constraints
+2. Create `brief.md` from [the template](assets/templates/brief.md)
+3. Show brief to user, get confirmation
+4. Create `status.md` from [the template](assets/templates/status.md) — phase: `planning`
 
-Fill in: project name, goal, scope, constraints. Ask the user questions if anything is unclear. Show the brief to the user and get confirmation before proceeding.
+### Phase 2 — Planning (load references/planner.md)
 
-### Step 2 — proposal.md
+1. **STOP** being Orchestrator. Clear your context of everything except brief.md.
+2. **LOAD** [references/planner.md](references/planner.md) — these are your only instructions now.
+3. Execute planner.md exactly as written.
+4. When planner.md finishes, **STOP** being Planner. You now have: proposal.md, spec.md, design.md, tasks.md, handoff.md.
+5. **RESUME** being Orchestrator. Update status.md — phase: `implementation`.
 
-Create `proposal.md` from [the template](assets/templates/proposal.md).
+### Phase 3 — Implementation (load references/developer.md)
 
-List at least 2 solution options. Explain pros/cons. Recommend one. Show to user and get confirmation.
+1. **STOP** being Orchestrator. Clear your context of everything except tasks.md, handoff.md, spec.md.
+2. **LOAD** [references/developer.md](references/developer.md) — these are your only instructions now.
+3. Execute developer.md exactly as written.
+4. When developer.md finishes, **STOP** being Developer.
+5. **RESUME** being Orchestrator. Update status.md — phase: `verification`.
 
-### Step 3 — spec.md
+### Phase 4 — Verification (load references/tester.md)
 
-Create `spec.md` from [the template](assets/templates/spec.md).
+1. **STOP** being Orchestrator. Clear your context of everything except spec.md, tasks.md, handoff.md.
+2. **LOAD** [references/tester.md](references/tester.md) — these are your only instructions now.
+3. Execute tester.md exactly as written.
+4. When tester.md finishes, **STOP** being Tester.
+5. **RESUME** being Orchestrator.
 
-Write functional requirements with acceptance criteria. Each requirement must be testable. Mark any unknowns as `TODO / NEEDS CONFIRMATION`.
+### Phase 5 — Feedback Loop (you as Orchestrator)
 
-### Step 4 — design.md
+1. Read `test-report.md` and `bug-report.md` (if exists).
+2. If `test-report.md` says ALL PASS:
+   - Go to Phase 6.
+3. If `bug-report.md` has open items:
+   - Go back to Phase 3 (load developer.md, fix bugs).
+   - Then Phase 4 (load tester.md, re-test).
+   - Repeat until all pass.
 
-Create `design.md` from [the template](assets/templates/design.md).
+### Phase 6 — Archive (you as Orchestrator)
 
-Describe architecture, components, data flow, and file changes. Be specific about which files will be modified.
-
-### Step 5 — tasks.md
-
-Create `tasks.md` from [the template](assets/templates/tasks.md).
-
-Decompose the work into atomic tasks. Each task must have: scope, files, dependencies, acceptance criteria. Tasks must be small enough that one agent can complete one task in a single session.
-
-### Step 6 — handoff.md
-
-Create `handoff.md` from [the template](assets/templates/handoff.md).
-
-Summarize what will be implemented. Include all tasks and acceptance criteria. This is the implementation plan.
-
-### Step 7 — status.md
-
-Create `status.md` from [the template](assets/templates/status.md).
-
-Set phase to `implementation`. Mark which tasks are pending.
-
-### Step 8 — Implementation
-
-Implement tasks ONE BY ONE from `tasks.md`. After each task, update `status.md` and `handoff.md` (implementation log).
-
-Do NOT modify files outside the task scope. Do NOT skip tasks.
-
-### Step 9 — test-plan.md
-
-Create `test-plan.md` from [the template](assets/templates/test-plan.md).
-
-Write test cases covering all acceptance criteria from spec.md.
-
-### Step 10 — test-report.md
-
-Create `test-report.md` from [the template](assets/templates/test-report.md).
-
-Execute the test plan. Record pass/fail for each test case.
-
-### Step 11 — bug-report.md (if needed)
-
-If any tests fail, create `bug-report.md` from [the template](assets/templates/bug-report.md).
-
-List each defect with severity. Go back to Step 8, fix the bugs, then re-test (repeat Step 9-11 until all pass).
-
-### Step 12 — archive.md
-
-Create `archive.md` from [the template](assets/templates/archive.md).
-
-Summarize everything: what was changed, test results, lessons learned, follow-up tasks.
-
-Update `status.md` — phase: `done`.
+1. Create `archive.md` from [the template](assets/templates/archive.md).
+2. Update `status.md` — phase: `done`.
+3. Present the result to the user: list all created artifacts, summarize changes.
 
 ---
 
-## ROLES (switch between them)
+## SUB-AGENT HANDOFF PROTOCOL
 
-This skill defines 4 roles. YOU play all of them, one at a time, in order:
+### To Planner
 
-| Step | Role | What you do |
-|------|------|-------------|
-| 1–2 | **Orchestrator** | Talk to user, gather context, confirm |
-| 2–6 | **Planner** | Research, plan, decompose |
-| 7–8 | **Developer** | Write code, update artifacts |
-| 9–11 | **Tester** | Test, report bugs, verify fixes |
-| 12 | **Orchestrator** | Archive and deliver |
+**Input:** `brief.md`
+**Output:** `proposal.md`, `spec.md`, `design.md`, `tasks.md`, `handoff.md`
 
-When you switch roles, say which role you are now playing. Example: *"Switching to Tester role — writing test-plan.md"*
+Planner sees ONLY brief.md. It does not know about other agents.
+
+### To Developer
+
+**Input:** `tasks.md`, `handoff.md`
+**Output:** code changes, updated `handoff.md` (implementation log)
+
+Developer sees ONLY tasks.md and handoff.md. It does not know about Planner, Tester, or the overall workflow.
+
+### To Tester
+
+**Input:** `spec.md`, `tasks.md`, `handoff.md`
+**Output:** `test-plan.md`, `test-report.md`, optionally `bug-report.md`
+
+Tester sees ONLY spec.md, tasks.md, handoff.md, and the actual code changes. It does not know about Planner or Developer.
 
 ---
 
-## ARTEFACT CHECKLIST (final verification)
+## STRICT PROTOCOL ENFORCEMENT
 
-Before declaring done, verify ALL of these exist:
+When you switch agents, say:
+> *"[role] engaged. Input: [artifacts]. Target: [output artifacts]."*
 
-- [ ] `brief.md` — confirmed by user
-- [ ] `proposal.md` — confirmed by user
-- [ ] `spec.md` — requirements + acceptance criteria
-- [ ] `design.md` — architecture + file changes
-- [ ] `tasks.md` — atomic tasks
-- [ ] `handoff.md` — implementation plan + log
-- [ ] `status.md` — phase tracking
-- [ ] `test-plan.md` — test cases
-- [ ] `test-report.md` — results
-- [ ] `archive.md` — final summary
+Example:
+> *"Planner engaged. Input: brief.md. Target: proposal.md, spec.md, design.md, tasks.md, handoff.md."*
 
-If any file is missing, you are NOT done.
+This signals the context switch. Do NOT skip this announcement.
