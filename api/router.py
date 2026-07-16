@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 from api.schemas import SkillInfo, SkillList, SkillSummary, GenerateRequest, GenerateResponse
-from api.registry import get_all_skills, get_skill, get_prompt, get_skill_dir
+from api.registry import get_all_skills, get_skill, get_reference, get_skill_dir
 from api.generator import generate_docs
 
 router = APIRouter(prefix="/api", tags=["skills"])
@@ -25,11 +25,11 @@ def skill_detail(skill_id: str):
     return skill
 
 
-@router.get("/skills/{skill_id}/prompts/{prompt_name}")
-def get_skill_prompt(skill_id: str, prompt_name: str):
-    content = get_prompt(skill_id, prompt_name)
+@router.get("/skills/{skill_id}/references/{ref_name}")
+def get_skill_reference(skill_id: str, ref_name: str):
+    content = get_reference(skill_id, ref_name)
     if content is None:
-        raise HTTPException(status_code=404, detail="Prompt not found")
+        raise HTTPException(status_code=404, detail="Reference not found")
     return PlainTextResponse(content, media_type="text/markdown")
 
 

@@ -28,7 +28,7 @@ def generate_docs(skill_id: str, project_spec: dict[str, Any]) -> dict[str, str]
     if not skill_dir:
         raise ValueError(f"Skill '{skill_id}' not found")
 
-    templates_dir = skill_dir / "templates"
+    templates_dir = skill_dir / "assets" / "templates"
     if not templates_dir.exists():
         return {}
 

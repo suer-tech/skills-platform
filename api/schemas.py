@@ -16,15 +16,21 @@ class SkillList(BaseModel):
 class SkillInfo(BaseModel):
     id: str
     name: str
+    description: str
     version: str
     category: str
-    description: str
     author: str
     inputs: dict[str, Any]
     outputs: dict[str, Any]
     capabilities: list[str]
+
+    license: str | None = None
+    compatibility: str | None = None
+    metadata: dict[str, Any] = {}
+    allowed_tools: str | None = None
+
     spec: str | None = None
-    prompts: list[str] = []
+    references: list[str] = []
 
 
 class GenerateRequest(BaseModel):
