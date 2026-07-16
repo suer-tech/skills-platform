@@ -1,9 +1,9 @@
 ---
 name: code-dev
 description: >
-  End-to-end management of code changes through multi-agent orchestration.
-  Use when a task requires planning, implementation, testing, and iterative
-  refinement across multiple specialised AI agents.
+  End-to-end development workflow with mandatory artifact creation.
+  Use for ANY code change: it forces you to plan, spec, design, implement,
+  test, and archive — in that order, with checkable artifacts at each step.
 metadata:
   id: engineering.code-dev
   version: "0.1.0"
@@ -12,146 +12,163 @@ metadata:
   inputs:
     request:
       required: true
-      description: "Описание запроса на разработку"
+      description: "What needs to be done"
     project_path:
       required: true
-      description: "Путь к проекту"
+      description: "Path to the project"
   outputs:
-    archive:
-      type: markdown
-      description: "Финальный архив с итогами"
     artifacts:
       type: files
-      description: "Все созданные артефакты (brief, spec, design, tasks, reports)"
+      description: "All created artifacts (brief, proposal, spec, design, tasks, reports, archive)"
   capabilities:
+    - spec_driven_development
     - multi_agent_orchestration
     - project_planning
     - spec_generation
     - task_decomposition
     - code_implementation
-    - automated_testing
+    - testing
     - bug_detection
     - iterative_refinement
     - documentation_generation
 ---
 
-# Code Development Agent
+# Code Development — Strict Protocol
 
-Управляет полным циклом разработки изменений через команду специализированных AI-агентов: от брифа и планирования до реализации, тестирования, возврата на доработку и финальной архивации.
+## RULES (you MUST follow every rule)
 
-## Philosophy
+### Gate 1: No code before plan
+YOU MUST create ALL of these files BEFORE writing any code:
+1. `brief.md`
+2. `proposal.md`
+3. `spec.md`
+4. `design.md`
+5. `tasks.md`
+6. `handoff.md`
 
-- **Spec-driven**: каждый шаг опирается на зафиксированный документ
-- **Feedback loop**: tester может вернуть задачи developer через orchestrator
-- **Single source of truth**: планы, спецификации и статусы хранятся в Markdown-артефактах
-- **Progressive disclosure**: артефакты подгружаются по мере необходимости
-- **No guessing**: все неопределённости явно помечаются `TODO / NEEDS CONFIRMATION`
+If any of these files does not exist, you are NOT allowed to write code.
 
-## Agents
+### Gate 2: No closure without testing
+YOU MUST create ALL of these files BEFORE declaring done:
+1. `test-plan.md`
+2. `test-report.md`
+3. `archive.md`
 
-| Agent | Role |
-|-------|------|
-| **Orchestrator** | Управляет процессом, передаёт контекст, контролирует переходы, фиксирует статус |
-| **Planner** | Брифинг, изучение проекта, proposal, spec, design, декомпозиция в задачи |
-| **Developer** | Реализация задач по плану, внесение изменений |
-| **Tester** | Проверка по acceptance criteria, поиск багов, отчёт |
+### Gate 3: Bugs must be fixed
+If `bug-report.md` exists and has open items, you MUST fix them and re-test. Do NOT skip to archive.
 
-## Workflow
+### Gate 4: One file at a time
+Create files in the order listed below. Do NOT skip ahead.
 
-### Phase 1 — Intake
+---
 
-**Actor:** Orchestrator
+## EXACT SEQUENCE
 
-1. Принять входной запрос
-2. Инициировать бриф с пользователем
-3. Собрать минимальный контекст: проект, цель, ограничения
-4. Записать [brief.md](assets/templates/brief.md)
-5. Передать контекст Planner
+### Step 1 — brief.md
 
-### Phase 2 — Planning
+Create `brief.md` from [the template](assets/templates/brief.md).
 
-**Actor:** Planner
+Fill in: project name, goal, scope, constraints. Ask the user questions if anything is unclear. Show the brief to the user and get confirmation before proceeding.
 
-1. Изучить проект и доступные материалы
-2. Создать [proposal.md](assets/templates/proposal.md) с вариантами решения
-3. Согласовать proposal с пользователем
-4. Написать [spec.md](assets/templates/spec.md) (requirements + acceptance criteria)
-5. Написать [design.md](assets/templates/design.md) (архитектура, компоненты, data flow)
-6. Декомпозировать работу в атомарные задачи: [tasks.md](assets/templates/tasks.md)
-7. Подготовить [handoff.md](assets/templates/handoff.md) для Developer и Tester
-8. Записать [status.md](assets/templates/status.md) — `planning: done`
+### Step 2 — proposal.md
 
-### Phase 3 — Implementation
+Create `proposal.md` from [the template](assets/templates/proposal.md).
 
-**Actor:** Developer
+List at least 2 solution options. Explain pros/cons. Recommend one. Show to user and get confirmation.
 
-1. Получить handoff от Planner
-2. Выполнять задачи из tasks.md по порядку
-3. Вносить изменения в код, конфиги, документацию
-4. Отмечать прогресс в status.md
-5. Фиксировать заметки в implementation notes (handoff.md → log)
-6. Сообщить Orchestrator о завершении
+### Step 3 — spec.md
 
-### Phase 4 — Verification
+Create `spec.md` from [the template](assets/templates/spec.md).
 
-**Actor:** Tester
+Write functional requirements with acceptance criteria. Each requirement must be testable. Mark any unknowns as `TODO / NEEDS CONFIRMATION`.
 
-1. Получить handoff и реализованные изменения
-2. Создать [test-plan.md](assets/templates/test-plan.md)
-3. Проверить каждую задачу по acceptance criteria
-4. Записать [test-report.md](assets/templates/test-report.md)
-5. Если найдены дефекты — создать [bug-report.md](assets/templates/bug-report.md)
-6. Передать отчёт Orchestrator
+### Step 4 — design.md
 
-### Phase 5 — Feedback Loop
+Create `design.md` from [the template](assets/templates/design.md).
 
-**Actor:** Orchestrator
+Describe architecture, components, data flow, and file changes. Be specific about which files will be modified.
 
-1. Прочитать test-report и bug-report
-2. Если дефектов **нет** → перейти к Closure
-3. Если дефекты **есть** → вернуть Developer с bug-report
-4. Developer исправляет, отмечает в status.md
-5. Tester перепроверяет
-6. Повторять, пока tester не подтвердит
+### Step 5 — tasks.md
 
-### Phase 6 — Closure
+Create `tasks.md` from [the template](assets/templates/tasks.md).
 
-**Actor:** Orchestrator
+Decompose the work into atomic tasks. Each task must have: scope, files, dependencies, acceptance criteria. Tasks must be small enough that one agent can complete one task in a single session.
 
-1. Собрать все артефакты
-2. Написать [archive.md](assets/templates/archive.md): summary, изменения, follow-up
-3. Обновить status.md — `done`
-4. Вернуть результат пользователю
+### Step 6 — handoff.md
 
-## Guardrails
+Create `handoff.md` from [the template](assets/templates/handoff.md).
 
-- Не переходить к планированию без минимально достаточного брифа
-- Не переходить к разработке без зафиксированных tasks.md
-- Не переходить к завершению без test-report.md
-- Если tester вернул дефекты — обязательно вернуть Developer
-- Ничего не выдумывать про проект — только то, что подтверждено
-- TODO / NEEDS CONFIRMATION — маркеры неопределённости
+Summarize what will be implemented. Include all tasks and acceptance criteria. This is the implementation plan.
 
-## Artefact Lifecycle
+### Step 7 — status.md
 
-```
-brief.md         → intake     → до передачи Planner
-proposal.md      → planning   → согласование с пользователем
-spec.md          → planning   → согласовано
-design.md        → planning   → согласовано
-tasks.md         → planning   → выполняется Developer
-handoff.md       → planning   → передача Developer / Tester
-test-plan.md     → verification
-test-report.md   → verification → обратно Developer при багах
-bug-report.md    → verification → обратно Developer
-status.md        → весь цикл  → единый источник статуса
-archive.md       → closure    → финал
-```
+Create `status.md` from [the template](assets/templates/status.md).
 
-## Success Criteria
+Set phase to `implementation`. Mark which tasks are pending.
 
-- Каждый этап зафиксирован в Markdown-артефакте
-- Все acceptance criteria проверены
-- Tester не нашёл дефектов перед closure
-- archive.md содержит полную картину изменений
-- Код, документация и тесты синхронизированы
+### Step 8 — Implementation
+
+Implement tasks ONE BY ONE from `tasks.md`. After each task, update `status.md` and `handoff.md` (implementation log).
+
+Do NOT modify files outside the task scope. Do NOT skip tasks.
+
+### Step 9 — test-plan.md
+
+Create `test-plan.md` from [the template](assets/templates/test-plan.md).
+
+Write test cases covering all acceptance criteria from spec.md.
+
+### Step 10 — test-report.md
+
+Create `test-report.md` from [the template](assets/templates/test-report.md).
+
+Execute the test plan. Record pass/fail for each test case.
+
+### Step 11 — bug-report.md (if needed)
+
+If any tests fail, create `bug-report.md` from [the template](assets/templates/bug-report.md).
+
+List each defect with severity. Go back to Step 8, fix the bugs, then re-test (repeat Step 9-11 until all pass).
+
+### Step 12 — archive.md
+
+Create `archive.md` from [the template](assets/templates/archive.md).
+
+Summarize everything: what was changed, test results, lessons learned, follow-up tasks.
+
+Update `status.md` — phase: `done`.
+
+---
+
+## ROLES (switch between them)
+
+This skill defines 4 roles. YOU play all of them, one at a time, in order:
+
+| Step | Role | What you do |
+|------|------|-------------|
+| 1–2 | **Orchestrator** | Talk to user, gather context, confirm |
+| 2–6 | **Planner** | Research, plan, decompose |
+| 7–8 | **Developer** | Write code, update artifacts |
+| 9–11 | **Tester** | Test, report bugs, verify fixes |
+| 12 | **Orchestrator** | Archive and deliver |
+
+When you switch roles, say which role you are now playing. Example: *"Switching to Tester role — writing test-plan.md"*
+
+---
+
+## ARTEFACT CHECKLIST (final verification)
+
+Before declaring done, verify ALL of these exist:
+
+- [ ] `brief.md` — confirmed by user
+- [ ] `proposal.md` — confirmed by user
+- [ ] `spec.md` — requirements + acceptance criteria
+- [ ] `design.md` — architecture + file changes
+- [ ] `tasks.md` — atomic tasks
+- [ ] `handoff.md` — implementation plan + log
+- [ ] `status.md` — phase tracking
+- [ ] `test-plan.md` — test cases
+- [ ] `test-report.md` — results
+- [ ] `archive.md` — final summary
+
+If any file is missing, you are NOT done.
